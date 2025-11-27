@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <meta charset="UTF-8"/>
+    <title>Start Page - Web Lab 3</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+    <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&amp;family=Roboto:ital,wght@0,100..900;1,100..900&amp;display=swap"
+          rel="stylesheet"/>
+    <link href="#{request.contextPath}/static/css/start.css" rel="stylesheet" type="text/css"/>
+    <style>
+        body {
+            --bg-image: url('#{request.contextPath}/api/random-background');
+        }
+    </style>
+</h:head>
+<body>
+    <div class="container">
+        <h1>Web Lab 3</h1>
+        
+        <div class="header-info">
+            <p><strong>ФИО:</strong> Турыгин Никита Денисович</p>
+            <p><strong>Группа:</strong> P3231</p>
+            <p><strong>Вариант:</strong> 3467</p>
+        </div>
+
+        <h:form id="startForm">
+            <div class="clock">
+                <h:outputText id="clock" value="#{startPageBean.currentDateTime}"/>
+            </div>
+            
+            <p:poll interval="5" update="clock" process="@this"/>
+
+            <h:commandLink value="Перейти к приложению" action="#{startPageBean.navigateToMain}" styleClass="nav-link"/>
+        </h:form>
+    </div>
+</body>
+</html>
+

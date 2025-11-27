@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <meta charset="UTF-8"/>
+    <title>Web Lab 3</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+    <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&amp;family=Roboto:ital,wght@0,100..900;1,100..900&amp;display=swap"
+          rel="stylesheet"/>
+    <script src="https://cdn.plot.ly/plotly-3.1.0.min.js" charset="utf-8"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            background-image: url('#{request.contextPath}/api/random-background');
+            background-size: auto;
+            background-position: center;
+            transition: background-image 0.5s ease-in-out;
+            background-repeat: repeat;
+        }
+
+        h1 {
+            font-family: 'Dela Gothic One', monospace;
+            font-style: normal;
+            font-weight: 400;
+            text-align: center;
+        }
+
+        h1::before,
+        h1::after {
+            content: "🌟";
+        }
+
+        table {
+            width: 100%;
+            max-height: 100vh;
+            height: 100%;
+            table-layout: fixed;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 4px;
+            margin-top: 4px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+            backdrop-filter: blur(12px) saturate(160%);
+            -webkit-backdrop-filter: blur(12px) saturate(160%);
+        }
+
+        .card-light {
+            background: rgba(255, 255, 255, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 4px;
+            box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.10);
+            backdrop-filter: blur(8px) saturate(140%);
+            -webkit-backdrop-filter: blur(8px) saturate(140%);
+        }
+
+        .plot {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .x-button {
+            margin: 2px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            background-color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+        }
+
+        .x-button:hover {
+            background-color: rgba(172, 255, 47, 0.5);
+        }
+
+        .x-button.active {
+            background-color: rgba(172, 255, 47, 0.8);
+            border: 2px solid rgba(0, 128, 0, 0.6);
+            font-weight: bold;
+        }
+
+        .submit-button {
+            width: 100%;
+            box-sizing: border-box;
+            cursor: pointer;
+            height: 69px;
+            font-family: 'Dela Gothic One', monospace;
+            font-style: normal;
+            font-weight: 400;
+            font-size: large;
+            text-align: center;
+            transition: all 0.25s;
+            border-radius: 8px;
+            background-color: rgba(172, 255, 47, 0.5);
+            border: 1px solid rgba(0, 128, 0, 0.3);
+            box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.10);
+        }
+
+        .submit-button:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(118, 124, 118, 0.3);
+            color: white;
+            transform: scale(1.01);
+        }
+
+        .reset-button {
+            background-color: rgba(240, 128, 128, 0.5);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .reset-button:hover {
+            background-color: rgba(255, 0, 0, 0.5);
+        }
+
+        .nav-link {
+            display: inline-block;
+            margin: 20px;
+            padding: 10px 20px;
+            background-color: rgba(172, 255, 47, 0.5);
+            color: #000;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 128, 0, 0.3);
+            font-family: 'Dela Gothic One', monospace;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+        }
+
+        .results-table {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .results-table th {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</h:head>
+<body>
+    <div class="header card">
+        <h1>Турыгин Никита Денисович</h1>
+    </div>
+
+    <h:form id="mainForm">
+        <p:messages id="messages" showDetail="true" closable="true" style="margin: 10px;"/>
+        <h:inputHidden id="historyJson" value="#{mainPageBean.historyJson}"/>
+        <h:inputHidden id="x" value="#{mainPageBean.x}"/>
+        <table>
+            <tr>
+                <td style="width: 65%; vertical-align: top;">
+                    <div class="card-light">
+                        <div id="myPlot" class="plot"></div>
+                    </div>
+                </td>
+                <td>
+                    <div class="card" id="formCard">
+                        <div class="card-light">
+                            <table>
+                                <tr>
+                                    <td><label>X:</label></td>
+                                    <td colspan="9">
+                                        <p:commandButton value="-5" action="#{mainPageBean.setXFromButton(-5.0)}" styleClass="x-button" process="@this" update="mainForm:x" onclick="highlightXButton(this, -5)"/>
+                                        <p:commandButton value="-4" action="#{mainPageBean.setXFromButton(-4.0)}" styleClass="x-button" process="@this" update="mainForm:x" onclick="highlightXButton(this, -4)"/>
+                                        <p:commandButton value="-3" action="#{mainPageBean.setXFromButton(-3.0)}" styleClass="x-button" process="@this" update="mainForm:x" onclick="highlightXButton(this, -3)"/>
+                                        <p:commandButton value="-2" action="#{mainPageBean.setXFromButton(-2.0)}" styleClass="x-button" process="@this" update="mainForm:x" onclick="highlightXButton(this, -2)"/>
+                                        <p:commandButton value="-1" action="#{mainPageBean.setXFromButton(-1.0)}" styleClass="x-button" process="@this" update="mainForm:x" onclick="highlightXButton(this, -1)"/>
+                                        <p:commandButton value="0" action="#{mainPageBean.setXFromButton(0.0)}" styleClass="x-button" process="@this" update="mainForm:x" onclick="highlightXButton(this, 0)"/>
+                                        <p:commandButton value="1" action="#{mainPageBean.setXFromButton(1.0)}" styleClass="x-button" process="@this" update="mainForm:x" onclick="highlightXButton(this, 1)"/>
+                                        <p:commandButton value="2" action="#{mainPageBean.setXFromButton(2.0)}" styleClass="x-button" process="@this" update="mainForm:x" onclick="highlightXButton(this, 2)"/>
+                                        <p:commandButton value="3" action="#{mainPageBean.setXFromButton(3.0)}" styleClass="x-button" process="@this" update="mainForm:x" onclick="highlightXButton(this, 3)"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><label>Y:</label></td>
+                                    <td colspan="9">
+                                        <h:inputText id="y" value="#{mainPageBean.y}" style="width: 100%;">
+                                            <f:validateDoubleRange minimum="-3.0" maximum="3.0"/>
+                                        </h:inputText>
+                                        <h:message for="y" style="color: red;"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><label>R:</label></td>
+                                    <td colspan="9">
+                                        <p:spinner id="r" value="#{mainPageBean.r}" min="1.0" max="3.0" stepFactor="0.5" style="width: 100%;">
+                                            <f:validateDoubleRange minimum="1.0" maximum="3.0"/>
+                                            <p:ajax event="change" update="mainForm:historyJson" oncomplete="updateGraphFromR()"/>
+                                        </p:spinner>
+                                        <h:message for="r" style="color: red;"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="10">
+                                        <p:commandButton id="submit" value="Submit" action="#{mainPageBean.checkPoint}" styleClass="submit-button"
+                                                         process="@form" update="mainForm:messages mainForm:historyJson mainForm:x resultsForm" 
+                                                         onerror="showValidationError()"
+                                                         oncomplete="setTimeout(function() { restoreXButtonHighlight(); updateGraphFromR(); }, 100)"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </h:form>
+
+    <h:form id="resultsForm">
+        <p:dataTable id="resultsTable" value="#{mainPageBean.results}" var="result" styleClass="results-table card" 
+                     rendered="#{not empty mainPageBean.results}" emptyMessage="No results yet">
+            <p:column headerText="X">
+                #{result.x}
+            </p:column>
+            <p:column headerText="Y">
+                #{result.y}
+            </p:column>
+            <p:column headerText="R">
+                #{result.r}
+            </p:column>
+            <p:column headerText="Result">
+                <h:outputText value="#{result.success ? '✅ Hit' : '❌ Miss'}" styleClass="#{result.success ? 'result-success' : 'result-failure'}"/>
+            </p:column>
+            <p:column headerText="Time">
+                #{result.time}
+            </p:column>
+            <p:column headerText="Execution Time">
+                #{result.took}
+            </p:column>
+        </p:dataTable>
+    </h:form>
+
+    <h:form id="clearForm">
+        <div style="text-align: center; margin: 10px 0;">
+            <p:commandButton action="#{mainPageBean.clearResults}" styleClass="reset-button" title="Очистить историю"
+                             immediate="true" process="@this" update="mainForm resultsForm" 
+                             oncomplete="setTimeout(function() { historyPoints = []; updateGraphFromR(); }, 300)">
+            </p:commandButton>
+        </div>
+    </h:form>
+
+    <div style="text-align: center;">
+        <h:link outcome="start" styleClass="nav-link" value="Вернуться на стартовую страницу"/>
+    </div>
+
+    <img src="https://media1.tenor.com/m/ndmoHqg8xikAAAAd/brian-family-guy.gif"></img>
+
+    <h:outputScript>
+        function showValidationError() {
+            var errorMessages = [];
+            var yInput = document.querySelector('[id$=":y"]');
+            if (yInput) {
+                var yMessage = yInput.parentElement.querySelector('.ui-message-error-detail, .ui-message-error, [class*="error"]');
+                if (yMessage) {
+                    var yText = yMessage.textContent || yMessage.innerText;
+                    if (yText &amp;&amp; yText.trim()) {
+                        errorMessages.push('Y: ' + yText.trim());
+                    }
+                }
+            }
+            
+            var rInput = document.querySelector('[id$=":r"]');
+            if (rInput) {
+                var rMessage = rInput.parentElement.querySelector('.ui-message-error-detail, .ui-message-error, [class*="error"]');
+                if (rMessage) {
+                    var rText = rMessage.textContent || rMessage.innerText;
+                    if (rText &amp;&amp; rText.trim()) {
+                        errorMessages.push('R: ' + rText.trim());
+                    }
+                }
+            }
+            
+            var xInput = document.querySelector('[id$=":x"]');
+            var xValue = xInput ? parseFloat(xInput.value) : null;
+            if (!xValue || isNaN(xValue)) {
+                errorMessages.push('X: не выбрано значение');
+            }
+            
+            var pfMessages = document.querySelectorAll('.ui-message-error-detail, .ui-messages-error-summary');
+            pfMessages.forEach(function(msg) {
+                var text = msg.textContent || msg.innerText;
+                if (text &amp;&amp; text.trim() &amp;&amp; errorMessages.indexOf(text.trim()) === -1) {
+                    errorMessages.push(text.trim());
+                }
+            });
+            
+            if (errorMessages.length > 0) {
+                alert(errorText);
+            }
+        }
+        
+        var selectedXValue = null;
+        
+        var clickHandlerAdded = false;
+        var clickHandler = null;
+        
+        function highlightXButton(button, value) {
+            var allXButtons = document.querySelectorAll('.x-button');
+            allXButtons.forEach(function(btn) {
+                btn.classList.remove('active');
+            });
+            if (button) {
+                button.classList.add('active');
+                selectedXValue = value;
+            }
+        }
+        
+        function clearXButtonHighlight() {
+            var allXButtons = document.querySelectorAll('.x-button');
+            allXButtons.forEach(function(btn) {
+                btn.classList.remove('active');
+            });
+            selectedXValue = null;
+        }
+        
+        function restoreXButtonHighlight() {
+            var xInput = document.querySelector('[id$=":x"]');
+            var currentX = xInput ? parseFloat(xInput.value) : null;
+            
+            if (currentX !== null &amp;&amp; !isNaN(currentX)) {
+                selectedXValue = currentX;
+                var allXButtons = document.querySelectorAll('.x-button');
+                allXButtons.forEach(function(btn) {
+                    if (parseFloat(btn.value) === currentX) {
+                        btn.classList.add('active');
+                    }
+                });
+            } else {
+                clearXButtonHighlight();
+            }
+        }
+        
+        function getPath(r) {
+            const rect_data = {
+                x: [0, -r, -r, 0, 0],
+                y: [0, 0, -r, -r, 0],
+                fill: "toself",
+                fillcolor: 'rgba(172, 255, 47, 0.5)',
+                line: { color: 'rgba(0,0,0,0)' },
+                type: 'scatter',
+                name: 'rect'
+            };
+
+            const theta = Array.from({ length: 100 }, (_, i) => (Math.PI / 2) * (i / 99));
+            const circle_x = theta.map(angle => -r/2 * Math.cos(angle));
+            const circle_y = theta.map(angle => r/2 * Math.sin(angle));
+            const circle_data = {
+                x: [0, ...circle_x, 0],
+                y: [0, ...circle_y, 0],
+                fill: "toself",
+                fillcolor: 'rgba(172, 255, 47, 0.5)',
+                line: { color: 'rgba(0,0,0,0)' },
+                type: 'scatter',
+                name: 'circle'
+            };
+
+            const triangle_x = [0, r, 0, 0];
+            const triangle_y = [0, 0, r/2, 0];
+            const triangle_data = {
+                x: triangle_x,
+                y: triangle_y,
+                fill: "toself",
+                fillcolor: 'rgba(172, 255, 47, 0.5)',
+                line: { color: 'rgba(0,0,0,0)' },
+                type: 'scatter',
+                name: 'triangle'
+            };
+            return [rect_data, circle_data, triangle_data];
+        }
+
+        var historyPoints = [];
+        var currentR = null;
+        var plotReady = false;
+
+        function pixelToPlotCoords(event, plotDiv) {
+            const rect = plotDiv.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+            const layout = plotDiv._fullLayout || plotDiv.layout;
+            if (!layout) {
+                console.error('Plot layout not available');
+                return null;
+            }
+            const xAxis = layout.xaxis || {};
+            const yAxis = layout.yaxis || {};
+            const xRange = xAxis.range || [-6, 6];
+            const yRange = yAxis.range || [-6, 6];
+            let plotWidth, plotHeight, plotLeft, plotTop;
+            if (layout._size) {
+                plotLeft = layout._size.l || 0;
+                plotTop = layout._size.t || 0;
+                plotWidth = layout._size.w || (rect.width - plotLeft - (layout._size.r || 0));
+                plotHeight = layout._size.h || (rect.height - plotTop - (layout._size.b || 0));
+            } else {
+                const margin = layout.margin || {};
+                plotLeft = margin.l || 0;
+                plotTop = margin.t || 0;
+                const plotRight = margin.r || 0;
+                const plotBottom = margin.b || 0;
+                plotWidth = rect.width - plotLeft - plotRight;
+                plotHeight = rect.height - plotTop - plotBottom;
+            }
+            const plotX = xRange[0] + (mouseX - plotLeft) / plotWidth * (xRange[1] - xRange[0]);
+            const plotY = yRange[1] - (mouseY - plotTop) / plotHeight * (yRange[1] - yRange[0]);
+            return { x: plotX, y: plotY };
+        }
+
+        function updateGraphFromR() {
+            var rInput = document.querySelector('[id$=":r_input"]');
+            var rValue = rInput ? parseFloat(rInput.value) : 1.0;
+            if (!rValue || isNaN(rValue)) rValue = 1.0;
+            currentR = rValue;
+            const plotDiv = document.getElementById('myPlot');
+            if (!plotDiv) return;
+
+            historyPoints = [];
+            try {
+                var historyInput = document.querySelector('[id$=":historyJson"]') || 
+                                   document.querySelector('#mainForm\\:historyJson') ||
+                                   document.getElementById('mainForm:historyJson');
+                if (historyInput) {
+                    var historyJson = historyInput.value || historyInput.textContent || '[]';
+                    if (historyJson &amp;&amp; historyJson.trim() !== '') {
+                        var historyData = JSON.parse(historyJson);
+                        historyData.forEach(function(result) {
+                            var color = result.success ? 'green' : 'red';
+                            var point = {
+                                x: [result.x],
+                                y: [result.y],
+                                mode: 'markers',
+                                marker: { color: color, size: 10 },
+                                type: 'scatter',
+                                name: result.success ? 'Hit' : 'Miss',
+                                showlegend: false
+                            };
+                            historyPoints.push(point);
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error('Error parsing history:', e);
+                historyPoints = [];
+            }
+
+            const newData = getPath(rValue);
+            const newLayout = {
+                margin: { l: 0, r: 0, t: 0, b: 0 },
+                showlegend: false,
+                plot_bgcolor: 'rgba(0, 0, 0, 0)',
+                paper_bgcolor: 'rgba(255, 255, 255, 0.5)',
+                xaxis: {
+                    showline: true,
+                    linecolor: 'black',
+                    linewidth: 2,
+                    mirror: true,
+                    fixedrange: true
+                },
+                yaxis: {
+                    showline: true,
+                    linecolor: 'black',
+                    linewidth: 2,
+                    mirror: true,
+                    scaleanchor: 'x',
+                    scaleratio: 1,
+                    fixedrange: true
+                },
+                shapes: [
+                    { type: 'line', x0: -rValue - 1, y0: 0, x1: rValue + 1, y1: 0, line: { color: 'black', width: 2 } },
+                    { type: 'line', x0: 0, y0: -rValue - 1, x1: 0, y1: rValue + 1, line: { color: 'black', width: 2 } }
+                ]
+            };
+            Plotly.newPlot('myPlot', [...newData, ...historyPoints], newLayout, { scrollZoom: false, doubleClick: false, displayModeBar: false, responsive: true })
+                .then(function () {
+                    plotReady = true;
+                    var plotDiv = document.getElementById('myPlot');
+                    if (plotDiv &amp;&amp; window.addClickHandler) {
+                        clickHandlerAdded = false;
+                        clickHandler = null;
+                        setTimeout(window.addClickHandler, 100);
+                    }
+                });
+        }
+
+        window.addEventListener('DOMContentLoaded', function () {
+            restoreXButtonHighlight();
+            const plotDiv = document.getElementById('myPlot');
+            if (plotDiv) {
+                const emptyLayout = {
+                    margin: { l: 0, r: 0, t: 0, b: 0 },
+                    showlegend: false,
+                    plot_bgcolor: 'rgba(0, 0, 0, 0)',
+                    paper_bgcolor: 'rgba(255, 255, 255, 0.5)',
+                    xaxis: {
+                        showline: true,
+                        linecolor: 'black',
+                        linewidth: 2,
+                        mirror: true,
+                        range: [-6, 6],
+                        fixedrange: true
+                    },
+                    yaxis: {
+                        showline: true,
+                        linecolor: 'black',
+                        linewidth: 2,
+                        mirror: true,
+                        scaleanchor: 'x',
+                        scaleratio: 1,
+                        range: [-6, 6],
+                        fixedrange: true
+                    },
+                    shapes: [
+                        { type: 'line', x0: -6, y0: 0, x1: 6, y1: 0, line: { color: 'black', width: 2 } },
+                        { type: 'line', x0: 0, y0: -6, x1: 0, y1: 6, line: { color: 'black', width: 2 } }
+                    ]
+                };
+                Plotly.newPlot('myPlot', [], emptyLayout, { scrollZoom: false, doubleClick: false, displayModeBar: false, responsive: true })
+                    .then(function () {
+                        plotReady = true;
+                        console.log('Plot initialized, plotReady:', plotReady);
+                        updateGraphFromR();
+                    });
+
+                window.addClickHandler = function() {
+                    console.log('addClickHandler called, plotReady:', plotReady, 'clickHandlerAdded:', clickHandlerAdded);
+                    var plotDiv = document.getElementById('myPlot');
+                    if (plotReady &amp;&amp; plotDiv) {
+                        if (clickHandler) {
+                            try {
+                                plotDiv.removeEventListener('click', clickHandler);
+                            } catch (e) {
+                                console.log('Error removing old handler:', e);
+                            }
+                            clickHandler = null;
+                        }
+                        
+                        clickHandler = function (event) {
+                            event.stopPropagation();
+                            event.preventDefault();
+                            event.stopImmediatePropagation();
+                            const coords = pixelToPlotCoords(event, plotDiv);
+                            if (!coords) {
+                                console.log('No coordinates');
+                                return;
+                            }
+                            console.log('Graph clicked, coords:', coords);
+                            
+                            var rInputElement = document.querySelector('[id$=":r_input"]');
+                            var rInput = rInputElement ? parseFloat(rInputElement.value) : null;
+                            if (!rInput || isNaN(rInput)) {
+                                alert('Please select R first');
+                                return;
+                            }
+                            
+                            var xValue = coords.x;
+                            if (xValue &lt; -5 || xValue &gt; 3) {
+                                alert('X должен быть вещественным числом от -5 до 3');
+                                return;
+                            }
+                            
+                            submitPointFromGraph(coords.x, coords.y, rInput);
+                        };
+                        
+                        plotDiv.addEventListener('click', clickHandler);
+                        clickHandlerAdded = true;
+                    } else {
+                        console.log('Plot not ready yet, retrying...');
+                        setTimeout(window.addClickHandler, 50);
+                    }
+                };
+                window.addClickHandler();
+            }
+        });
+
+        function submitPointFromGraph(x, y, r) {
+            var xVal = parseFloat(x);
+            if (isNaN(xVal)) {
+                return;
+            }
+            if (xVal &lt; -5) {
+                return;
+            }
+            if (xVal &gt; 3) {
+                return;
+            }
+            
+            var xInput = document.querySelector('[id$=":x"]');
+            var yInput = document.querySelector('[id$=":y"]');
+            var rInput = document.querySelector('[id$=":r_input"]');
+            
+            if (xInput) {
+                xInput.value = x;
+                if (xInput.setAttribute) {
+                    xInput.setAttribute('value', x);
+                }
+            }
+            if (yInput) yInput.value = y;
+            if (rInput) rInput.value = r;
+            
+            clearXButtonHighlight();
+            
+            var submitButton = document.querySelector('[id$=":submit"]');
+            if (submitButton) {
+                submitButton.click();
+            } else {
+                jsf.ajax.request(null, null, {
+                    execute: 'mainForm',
+                    render: 'mainForm:historyJson mainForm:x resultsForm',
+                    oncomplete: function() { 
+                        restoreXButtonHighlight();
+                        updateGraphFromR(); 
+                    }
+                });
+            }
+        }
+    </h:outputScript>
+</body>
+</html>
