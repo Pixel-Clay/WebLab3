@@ -37,13 +37,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Jakarta Faces (JSF) Implementation (Mojarra) -->
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>jakarta.faces</artifactId>
-            <version>4.0.1</version>
-        </dependency>
-
         <!-- PrimeFaces (Jakarta EE 9+ compatible) -->
         <dependency>
             <groupId>org.primefaces</groupId>
