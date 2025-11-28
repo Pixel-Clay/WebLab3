@@ -106,7 +106,7 @@
     </dependencies>
 
     <build>
-        <finalName>web-lab2</finalName>
+        <finalName>web-lab3</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

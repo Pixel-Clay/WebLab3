@@ -18,6 +18,9 @@ public class MainPageBean implements Serializable {
     @Inject
     private ResultsService resultsService;
 
+    @NotNull(message = "X is required")
+    @DecimalMin(value = "-5.0", message = "Y must be >= -3")
+    @DecimalMax(value = "3.0", message = "Y must be <= 3")
     private Double x;
     
     @NotNull(message = "Y is required")
@@ -84,16 +87,6 @@ public class MainPageBean implements Serializable {
         y = null;
         
         return null;
-    }
-
-    public String checkPointFromGraph(double graphX, double graphY) {
-        if (r == null) {
-            return null;
-        }
-
-        this.x = graphX;
-        this.y = graphY;
-        return checkPoint();
     }
 
     public void clearResults() {

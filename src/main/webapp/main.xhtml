@@ -204,7 +204,7 @@
                                     <td colspan="9">
                                         <p:spinner id="r" value="#{mainPageBean.r}" min="1.0" max="3.0" stepFactor="0.5" style="width: 100%;">
                                             <f:validateDoubleRange minimum="1.0" maximum="3.0"/>
-                                            <p:ajax event="change" update="mainForm:historyJson" oncomplete="updateGraphFromR()"/>
+                                            <p:ajax event="change" process="r y" update="mainForm:historyJson" oncomplete="updateGraphFromR()"/>
                                         </p:spinner>
                                         <h:message for="r" style="color: red;"/>
                                     </td>
