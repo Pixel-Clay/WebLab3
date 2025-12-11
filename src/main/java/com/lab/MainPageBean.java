@@ -89,6 +89,35 @@ public class MainPageBean implements Serializable {
         return null;
     }
 
+    public String checkPointFromForm() {
+        if (x == null || y == null || r == null) {
+            return null;
+        }
+
+        double xDouble = x.doubleValue();
+        if (Math.abs(xDouble - Math.round(xDouble)) > 0.0001) {
+            jakarta.faces.context.FacesContext.getCurrentInstance()
+                .addMessage(null, new jakarta.faces.application.FacesMessage(
+                    jakarta.faces.application.FacesMessage.SEVERITY_ERROR,
+                    "X must be a whole number",
+                    "X must be a whole number"
+                ));
+            return null;
+        }
+
+        if (x < -5 || x > 3) {
+            jakarta.faces.context.FacesContext.getCurrentInstance()
+                .addMessage(null, new jakarta.faces.application.FacesMessage(
+                    jakarta.faces.application.FacesMessage.SEVERITY_ERROR,
+                    "X must be between -5 and 3",
+                    "X must be between -5 and 3"
+                ));
+            return null;
+        }
+
+        return checkPoint();
+    }
+
     public void clearResults() {
         resultsService.clearResults();
     }
