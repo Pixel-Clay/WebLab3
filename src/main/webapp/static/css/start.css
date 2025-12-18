@@ -1,0 +1,84 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-image: var(--bg-image);
+    background-size: auto;
+    background-position: center;
+    transition: background-image 0.5s ease-in-out;
+    background-repeat: repeat;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    background-color: rgba(255, 255, 255, 0.3);
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    max-width: 800px;
+    width: 100%;
+    text-align: center;
+}
+
+h1 {
+    font-family: 'Dela Gothic One', monospace;
+    font-style: normal;
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+h1::before,
+h1::after {
+    content: "🌟";
+}
+
+.header-info {
+    margin: 20px 0;
+    font-size: 18px;
+    line-height: 1.8;
+}
+
+.header-info p {
+    margin: 10px 0;
+}
+
+.clock {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 30px 0;
+    padding: 20px;
+    background-color: rgba(172, 255, 47, 0.3);
+    border-radius: 8px;
+    border: 2px solid rgba(0, 128, 0, 0.3);
+}
+
+.nav-link {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 15px 40px;
+    background-color: rgba(172, 255, 47, 0.5);
+    color: #000;
+    text-decoration: none;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 128, 0, 0.3);
+    font-family: 'Dela Gothic One', monospace;
+    font-size: 18px;
+    transition: all 0.25s;
+    box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.10);
+}
+
+.nav-link:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(118, 124, 118, 0.3);
+    color: white;
+    box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.228);
+    transform: scale(1.05);
+}
+
